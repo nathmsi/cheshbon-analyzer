@@ -18,7 +18,7 @@ import { useLanguage } from "@/lib/i18n/language-context";
 import { getAvailableAnalyzers } from "@/lib/analyzers/registry";
 import type { AnalysisResult } from "@/lib/analyzers/types";
 import type { CaseSummaryResult } from "@/lib/cases/case-summary";
-import { documentFileUrl, getPreviewMode } from "@/lib/cases/document-file";
+import { documentFileUrl } from "@/lib/cases/document-file";
 import { DocumentPreviewModal } from "@/components/cases/document-preview-modal";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -298,7 +298,6 @@ function DocumentRow({
             variant="ghost"
             size="sm"
             title={t.cases.preview}
-            disabled={!canPreview}
             onClick={onPreview}
             data-testid={`doc-preview-${doc.id}`}
           >
