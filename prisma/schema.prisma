@@ -20,8 +20,63 @@ enum DocumentStatus {
   ERROR
 }
 
+model User {
+  id            String        @id @default(cuid())
+  name          String?
+  email         String        @unique
+  emailVerified DateTime?     @map("email_verified")
+  image         String?
+  accounts      Account[]
+  sessions      Session[]
+  cases         ClientCase[]
+  createdAt     DateTime      @default(now()) @map("created_at")
+  updatedAt     DateTime      @updatedAt @map("updated_at")
+
+  @@map("users")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String  @map("user_id")
+  type              String
+  provider          String
+  providerAccountId String  @map("provider_account_id")
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique @map("session_token")
+  userId       String   @map("user_id")
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
 model ClientCase {
   id          String     @id @default(cuid())
+  userId      String     @map("user_id")
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   clientName  String     @map("client_name")
   clientIdNum String?    @map("client_id_num")
   taxYear     Int        @map("tax_year")
@@ -31,6 +86,7 @@ model ClientCase {
   updatedAt   DateTime   @updatedAt @map("updated_at")
   documents   Document[]
 
+  @@index([userId])
   @@index([taxYear])
   @@index([clientName])
   @@map("client_cases")
@@ -44,7 +100,7 @@ model Document {
   mimeType     String         @map("mime_type")
   fileSize     Int            @map("file_size")
   blobUrl      String?        @map("blob_url")
-  fileData      Bytes?         @map("file_data")
+  fileData     Bytes?         @map("file_data")
   analyzerId   String         @map("analyzer_id")
   status       DocumentStatus @default(PENDING)
   analysisJson Json?          @map("analysis_json")

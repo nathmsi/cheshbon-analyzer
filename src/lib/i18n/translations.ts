@@ -96,8 +96,19 @@ export const translations = {
       },
     },
 
+    auth: {
+      label: "התחברות",
+      loginTitle: "כניסה לחשבון",
+      loginSubtitle: "התיקים שלך מוגנים — רק אתה יכול לגשת אליהם",
+      signIn: "התחבר",
+      signOut: "יציאה",
+      signInWithGoogle: "המשך עם Google",
+      account: "חשבון",
+      loginError: "שגיאה בהתחברות — נסה שוב",
+      privacyNote: "התיקים והמסמכים נשמרים בחשבון שלך בלבד",
+    },
+
     analyze: {
-      uploadTitle: "העלאת קובץ",
       uploadSubtitle: "גרור קובץ לכאן או לחץ לבחירה",
       supportedFormats: "Excel (.xlsx, .xls), CSV ו-PDF",
       analyzing: "מנתח את הקובץ...",

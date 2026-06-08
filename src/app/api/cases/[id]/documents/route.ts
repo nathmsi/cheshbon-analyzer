@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { prisma, isDatabaseConfigured } from "@/lib/db/prisma";
 import { analyzeFileBuffer } from "@/lib/analyzers/parse-buffer";
 import type { AnalysisResult } from "@/lib/analyzers/types";
+import { getOwnedCase, requireAuthUserId } from "@/lib/auth/require-user";
 
 type RouteParams = { params: Promise<{ id: string }> };
 
@@ -11,9 +12,12 @@ export async function POST(request: Request, { params }: RouteParams) {
     return NextResponse.json({ error: "Database not configured" }, { status: 503 });
   }
 
+  const userId = await requireAuthUserId();
+  if (userId instanceof NextResponse) return userId;
+
   const { id: caseId } = await params;
 
-  const existingCase = await prisma.clientCase.findUnique({ where: { id: caseId } });
+  const existingCase = await getOwnedCase(caseId, userId);
   if (!existingCase) {
     return NextResponse.json({ error: "Case not found" }, { status: 404 });
   }

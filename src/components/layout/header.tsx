@@ -6,6 +6,7 @@ import { Calculator } from "lucide-react";
 import { useLanguage } from "@/lib/i18n/language-context";
 import { LanguageSwitcher } from "./language-switcher";
 import { ThemeToggle } from "./theme-toggle";
+import { AuthButton } from "@/components/auth/auth-button";
 import { cn } from "@/lib/utils/cn";
 
 const quickLinks = [
@@ -48,6 +49,7 @@ export function Header() {
         </nav>
 
         <div className="flex items-center gap-1.5">
+          <AuthButton />
           <ThemeToggle />
           <LanguageSwitcher />
         </div>

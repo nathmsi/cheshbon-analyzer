@@ -1,12 +1,17 @@
 import { NextResponse } from "next/server";
 import { prisma, isDatabaseConfigured } from "@/lib/db/prisma";
+import { requireAuthUserId } from "@/lib/auth/require-user";
 
 export async function GET() {
   if (!isDatabaseConfigured()) {
     return NextResponse.json({ error: "Database not configured" }, { status: 503 });
   }
 
+  const userId = await requireAuthUserId();
+  if (userId instanceof NextResponse) return userId;
+
   const cases = await prisma.clientCase.findMany({
+    where: { userId },
     orderBy: { updatedAt: "desc" },
     include: {
       documents: {
@@ -36,6 +41,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Database not configured" }, { status: 503 });
   }
 
+  const userId = await requireAuthUserId();
+  if (userId instanceof NextResponse) return userId;
+
   const body = await request.json();
   const { clientName, clientIdNum, taxYear, notes } = body;
 
@@ -48,6 +56,7 @@ export async function POST(request: Request) {
 
   const clientCase = await prisma.clientCase.create({
     data: {
+      userId,
       clientName: String(clientName),
       clientIdNum: clientIdNum ? String(clientIdNum) : null,
       taxYear: Number(taxYear),

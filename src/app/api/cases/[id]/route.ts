@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma, isDatabaseConfigured } from "@/lib/db/prisma";
 import { buildCaseSummary } from "@/lib/cases/case-summary";
 import type { AnalysisResult } from "@/lib/analyzers/types";
+import { getOwnedCase, requireAuthUserId } from "@/lib/auth/require-user";
 
 type RouteParams = { params: Promise<{ id: string }> };
 
@@ -10,7 +11,15 @@ export async function GET(_request: Request, { params }: RouteParams) {
     return NextResponse.json({ error: "Database not configured" }, { status: 503 });
   }
 
+  const userId = await requireAuthUserId();
+  if (userId instanceof NextResponse) return userId;
+
   const { id } = await params;
+  const owned = await getOwnedCase(id, userId);
+  if (!owned) {
+    return NextResponse.json({ error: "Case not found" }, { status: 404 });
+  }
+
   const clientCase = await prisma.clientCase.findUnique({
     where: { id },
     include: {
@@ -70,7 +79,15 @@ export async function PATCH(request: Request, { params }: RouteParams) {
     return NextResponse.json({ error: "Database not configured" }, { status: 503 });
   }
 
+  const userId = await requireAuthUserId();
+  if (userId instanceof NextResponse) return userId;
+
   const { id } = await params;
+  const owned = await getOwnedCase(id, userId);
+  if (!owned) {
+    return NextResponse.json({ error: "Case not found" }, { status: 404 });
+  }
+
   const body = await request.json();
 
   const clientCase = await prisma.clientCase.update({
@@ -94,7 +111,15 @@ export async function DELETE(_request: Request, { params }: RouteParams) {
     return NextResponse.json({ error: "Database not configured" }, { status: 503 });
   }
 
+  const userId = await requireAuthUserId();
+  if (userId instanceof NextResponse) return userId;
+
   const { id } = await params;
+  const owned = await getOwnedCase(id, userId);
+  if (!owned) {
+    return NextResponse.json({ error: "Case not found" }, { status: 404 });
+  }
+
   await prisma.clientCase.delete({ where: { id } });
   return NextResponse.json({ ok: true });
 }

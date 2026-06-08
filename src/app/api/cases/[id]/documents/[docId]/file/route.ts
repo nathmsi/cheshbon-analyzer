@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma, isDatabaseConfigured } from "@/lib/db/prisma";
 import { contentDisposition, resolveMimeType } from "@/lib/cases/document-file";
+import { getOwnedCase, requireAuthUserId } from "@/lib/auth/require-user";
 
 type RouteParams = { params: Promise<{ id: string; docId: string }> };
 
@@ -9,7 +10,16 @@ export async function GET(request: Request, { params }: RouteParams) {
     return NextResponse.json({ error: "Database not configured" }, { status: 503 });
   }
 
+  const userId = await requireAuthUserId();
+  if (userId instanceof NextResponse) return userId;
+
   const { id: caseId, docId } = await params;
+
+  const owned = await getOwnedCase(caseId, userId);
+  if (!owned) {
+    return NextResponse.json({ error: "Case not found" }, { status: 404 });
+  }
+
   const { searchParams } = new URL(request.url);
   const disposition =
     searchParams.get("disposition") === "attachment" ? "attachment" : "inline";
