@@ -1,11 +1,11 @@
 import { Suspense } from "react";
 import { isGoogleAuthConfigured } from "@/lib/auth/google-configured";
-import { LoginClient } from "./login-client";
+import { RegisterClient } from "./register-client";
 
-export default function LoginPage() {
+export default function RegisterPage() {
   return (
     <Suspense fallback={<p className="py-12 text-center text-muted">...</p>}>
-      <LoginClient googleEnabled={isGoogleAuthConfigured()} />
+      <RegisterClient googleEnabled={isGoogleAuthConfigured()} />
     </Suspense>
   );
 }
