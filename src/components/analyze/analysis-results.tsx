@@ -96,7 +96,10 @@ export function AnalysisResults({ result, fileName, onReset }: AnalysisResultsPr
               </p>
             )}
             <div className="mt-3 flex flex-wrap gap-2">
-              <span className="rounded-md bg-white/15 px-2.5 py-1 text-xs font-semibold backdrop-blur-sm">
+              <span
+                className="rounded-md bg-white/15 px-2.5 py-1 text-xs font-semibold backdrop-blur-sm"
+                data-testid="confidence-badge"
+              >
                 {t.results.confidence}: {conf.label}
               </span>
               <span className="rounded-md bg-white/10 px-2.5 py-1 text-xs font-medium text-white/80">

@@ -21,6 +21,7 @@ export function Breadcrumbs({ items }: BreadcrumbsProps) {
           {item.href ? (
             <Link
               href={item.href}
+              data-testid={item.href === "/" ? "back-home" : undefined}
               className="font-medium text-muted transition-colors hover:text-[var(--brand)]"
             >
               {item.label}
