@@ -1,7 +1,18 @@
-export type PreviewKind = "pdf" | "image" | "text" | "none";
+export type PreviewMode = "pdf" | "image" | "none";
+
+export function documentFileUrl(
+  caseId: string,
+  docId: string,
+  disposition: "inline" | "attachment",
+): string {
+  return `/api/cases/${caseId}/documents/${docId}/file?disposition=${disposition}`;
+}
 
 export function resolveMimeType(mimeType: string, fileName: string): string {
-  if (mimeType && mimeType !== "application/octet-stream") return mimeType;
+  if (mimeType && mimeType !== "application/octet-stream") {
+    return mimeType;
+  }
+
   const ext = fileName.split(".").pop()?.toLowerCase();
   const map: Record<string, string> = {
     pdf: "application/pdf",
@@ -14,24 +25,21 @@ export function resolveMimeType(mimeType: string, fileName: string): string {
     webp: "image/webp",
     gif: "image/gif",
   };
-  return (ext && map[ext]) || "application/octet-stream";
+
+  return map[ext ?? ""] ?? "application/octet-stream";
 }
 
-export function getPreviewKind(mimeType: string, fileName: string): PreviewKind {
+export function getPreviewMode(mimeType: string, fileName: string): PreviewMode {
   const resolved = resolveMimeType(mimeType, fileName);
-  if (resolved === "application/pdf" || fileName.toLowerCase().endsWith(".pdf")) {
-    return "pdf";
-  }
+  if (resolved === "application/pdf") return "pdf";
   if (resolved.startsWith("image/")) return "image";
-  if (resolved === "text/csv" || fileName.toLowerCase().endsWith(".csv")) return "text";
   return "none";
 }
 
-export function documentFileUrl(
-  caseId: string,
-  docId: string,
-  options?: { download?: boolean },
+export function contentDisposition(
+  disposition: "inline" | "attachment",
+  fileName: string,
 ): string {
-  const disposition = options?.download ? "attachment" : "inline";
-  return `/api/cases/${caseId}/documents/${docId}/file?disposition=${disposition}`;
+  const safeName = fileName.replace(/[^\w.\-() ]/g, "_");
+  return `${disposition}; filename="${safeName}"; filename*=UTF-8''${encodeURIComponent(fileName)}`;
 }

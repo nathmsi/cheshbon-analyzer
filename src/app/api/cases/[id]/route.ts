@@ -13,17 +13,46 @@ export async function GET(_request: Request, { params }: RouteParams) {
   const { id } = await params;
   const clientCase = await prisma.clientCase.findUnique({
     where: { id },
-    include: { documents: { orderBy: { createdAt: "desc" } } },
+    include: {
+      documents: {
+        orderBy: { createdAt: "desc" },
+        select: {
+          id: true,
+          fileName: true,
+          mimeType: true,
+          fileSize: true,
+          blobUrl: true,
+          analyzerId: true,
+          status: true,
+          analysisJson: true,
+          errorMessage: true,
+          analyzedAt: true,
+          createdAt: true,
+        },
+      },
+    },
   });
 
   if (!clientCase) {
     return NextResponse.json({ error: "Case not found" }, { status: 404 });
   }
 
+  const fileFlags = await prisma.$queryRaw<Array<{ id: string; has_file: boolean }>>`
+    SELECT id, (file_data IS NOT NULL OR blob_url IS NOT NULL) AS has_file
+    FROM documents
+    WHERE case_id = ${id}
+  `;
+  const hasFileMap = new Map(fileFlags.map((f) => [f.id, f.has_file]));
+
+  const documents = clientCase.documents.map((d) => ({
+    ...d,
+    hasFile: hasFileMap.get(d.id) ?? false,
+  }));
+
   const summary = buildCaseSummary(
     clientCase.clientName,
     clientCase.taxYear,
-    clientCase.documents.map((d) => ({
+    documents.map((d) => ({
       id: d.id,
       fileName: d.fileName,
       analyzerId: d.analyzerId,
@@ -32,7 +61,8 @@ export async function GET(_request: Request, { params }: RouteParams) {
     })),
   );
 
-  return NextResponse.json({ ...clientCase, summary });
+  const { documents: _docs, ...caseData } = clientCase;
+  return NextResponse.json({ ...caseData, documents, summary });
 }
 
 export async function PATCH(request: Request, { params }: RouteParams) {

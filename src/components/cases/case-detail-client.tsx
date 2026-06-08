@@ -10,15 +10,31 @@ import {
   AlertCircle,
   Copy,
   Check,
+  Eye,
+  ExternalLink,
+  Download,
 } from "lucide-react";
 import { useLanguage } from "@/lib/i18n/language-context";
 import { getAvailableAnalyzers } from "@/lib/analyzers/registry";
 import type { AnalysisResult } from "@/lib/analyzers/types";
 import type { CaseSummaryResult } from "@/lib/cases/case-summary";
+import { documentFileUrl, getPreviewMode } from "@/lib/cases/document-file";
+import { DocumentPreviewModal } from "@/components/cases/document-preview-modal";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { cn } from "@/lib/utils/cn";
+
+type CaseDocument = {
+  id: string;
+  fileName: string;
+  mimeType: string;
+  analyzerId: string;
+  status: string;
+  hasFile: boolean;
+  analysisJson: AnalysisResult | null;
+  errorMessage: string | null;
+};
 
 type CaseDetail = {
   id: string;
@@ -26,16 +42,11 @@ type CaseDetail = {
   clientIdNum: string | null;
   taxYear: number;
   status: string;
-  documents: Array<{
-    id: string;
-    fileName: string;
-    analyzerId: string;
-    status: string;
-    analysisJson: AnalysisResult | null;
-    errorMessage: string | null;
-  }>;
+  documents: CaseDocument[];
   summary: CaseSummaryResult;
 };
+
+type PreviewDoc = Pick<CaseDocument, "id" | "fileName" | "mimeType">;
 
 export function CaseDetailClient({ id }: { id: string }) {
   const { t, locale, isRtl } = useLanguage();
@@ -44,6 +55,7 @@ export function CaseDetailClient({ id }: { id: string }) {
   const [uploading, setUploading] = useState(false);
   const [selectedAnalyzer, setSelectedAnalyzer] = useState("form-106");
   const [copied, setCopied] = useState(false);
+  const [previewDoc, setPreviewDoc] = useState<PreviewDoc | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const analyzers = getAvailableAnalyzers();
@@ -117,7 +129,6 @@ export function CaseDetailClient({ id }: { id: string }) {
         )}
       </div>
 
-      {/* Case summary KPIs */}
       {data.summary.kpis.length > 0 && (
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4" data-testid="case-summary-kpis">
           {data.summary.kpis.map((kpi) => (
@@ -160,7 +171,6 @@ export function CaseDetailClient({ id }: { id: string }) {
         </Card>
       )}
 
-      {/* Upload section */}
       <Card>
         <CardHeader>
           <h3 className="font-bold text-heading">{t.cases.addDocument}</h3>
@@ -215,7 +225,6 @@ export function CaseDetailClient({ id }: { id: string }) {
         </CardContent>
       </Card>
 
-      {/* Documents list */}
       <Card>
         <CardHeader>
           <h3 className="font-bold text-heading">
@@ -228,35 +237,103 @@ export function CaseDetailClient({ id }: { id: string }) {
           ) : (
             <div className="divide-y divide-[var(--border)]">
               {data.documents.map((doc) => (
-                <div key={doc.id} className="flex items-center gap-3 py-4">
-                  <FileText className="h-5 w-5 shrink-0 text-[var(--brand)]" />
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate font-semibold text-heading">{doc.fileName}</p>
-                    <p className="text-xs text-muted">
-                      {t.analyzers[doc.analyzerId as keyof typeof t.analyzers]?.shortDesc ??
-                        doc.analyzerId}
-                    </p>
-                  </div>
-                  {doc.status === "ANALYZED" && (
-                    <CheckCircle2 className="h-5 w-5 text-[var(--success)]" />
-                  )}
-                  {doc.status === "ERROR" && (
-                    <AlertCircle className="h-5 w-5 text-[var(--danger)]" />
-                  )}
-                  {doc.status === "PENDING" && (
-                    <Loader2 className="h-5 w-5 animate-spin text-muted" />
-                  )}
-                  {doc.analysisJson?.summary.kpis[0] && (
-                    <span className="amount hidden text-sm font-bold text-heading sm:block">
-                      {doc.analysisJson.summary.kpis[0].value}
-                    </span>
-                  )}
-                </div>
+                <DocumentRow
+                  key={doc.id}
+                  caseId={id}
+                  doc={doc}
+                  onPreview={() =>
+                    setPreviewDoc({
+                      id: doc.id,
+                      fileName: doc.fileName,
+                      mimeType: doc.mimeType,
+                    })
+                  }
+                />
               ))}
             </div>
           )}
         </CardContent>
       </Card>
+
+      {previewDoc && (
+        <DocumentPreviewModal
+          caseId={id}
+          docId={previewDoc.id}
+          fileName={previewDoc.fileName}
+          mimeType={previewDoc.mimeType}
+          onClose={() => setPreviewDoc(null)}
+        />
+      )}
+    </div>
+  );
+}
+
+function DocumentRow({
+  caseId,
+  doc,
+  onPreview,
+}: {
+  caseId: string;
+  doc: CaseDocument;
+  onPreview: () => void;
+}) {
+  const { t } = useLanguage();
+  const inlineUrl = documentFileUrl(caseId, doc.id, "inline");
+  const downloadUrl = documentFileUrl(caseId, doc.id, "attachment");
+
+  return (
+    <div className="flex flex-wrap items-center gap-3 py-4" data-testid={`doc-row-${doc.id}`}>
+      <FileText className="h-5 w-5 shrink-0 text-[var(--brand)]" />
+      <div className="min-w-0 flex-1">
+        <p className="truncate font-semibold text-heading">{doc.fileName}</p>
+        <p className="text-xs text-muted">
+          {t.analyzers[doc.analyzerId as keyof typeof t.analyzers]?.shortDesc ??
+            doc.analyzerId}
+        </p>
+      </div>
+
+      {doc.hasFile && (
+        <div className="flex shrink-0 items-center gap-1">
+          <Button
+            variant="ghost"
+            size="sm"
+            title={t.cases.preview}
+            disabled={!canPreview}
+            onClick={onPreview}
+            data-testid={`doc-preview-${doc.id}`}
+          >
+            <Eye className="h-4 w-4" />
+            <span className="hidden sm:inline">{t.cases.preview}</span>
+          </Button>
+          <a href={inlineUrl} target="_blank" rel="noopener noreferrer">
+            <Button variant="ghost" size="sm" title={t.cases.open} data-testid={`doc-open-${doc.id}`}>
+              <ExternalLink className="h-4 w-4" />
+              <span className="hidden sm:inline">{t.cases.open}</span>
+            </Button>
+          </a>
+          <a href={downloadUrl} download={doc.fileName}>
+            <Button variant="ghost" size="sm" title={t.cases.download} data-testid={`doc-download-${doc.id}`}>
+              <Download className="h-4 w-4" />
+              <span className="hidden sm:inline">{t.cases.download}</span>
+            </Button>
+          </a>
+        </div>
+      )}
+
+      {doc.status === "ANALYZED" && (
+        <CheckCircle2 className="h-5 w-5 shrink-0 text-[var(--success)]" />
+      )}
+      {doc.status === "ERROR" && (
+        <AlertCircle className="h-5 w-5 shrink-0 text-[var(--danger)]" />
+      )}
+      {doc.status === "PENDING" && (
+        <Loader2 className="h-5 w-5 shrink-0 animate-spin text-muted" />
+      )}
+      {doc.analysisJson?.summary.kpis[0] && (
+        <span className="amount hidden text-sm font-bold text-heading sm:block">
+          {doc.analysisJson.summary.kpis[0].value}
+        </span>
+      )}
     </div>
   );
 }

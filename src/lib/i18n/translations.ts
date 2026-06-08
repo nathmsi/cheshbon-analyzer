@@ -82,6 +82,12 @@ export const translations = {
       noDocuments: "אין מסמכים בתיק",
       caseSummary: "סיכום תיק",
       readyForFiling: "מוכן לעבודה על ההגשה",
+      preview: "תצוגה",
+      open: "פתח",
+      download: "הורד",
+      close: "סגור",
+      previewNotAvailable:
+        "אין תצוגה מקדימה לסוג קובץ זה — פתח או הורד את הקובץ",
       status: {
         DRAFT: "טיוטה",
         IN_PROGRESS: "בעבודה",
@@ -252,6 +258,12 @@ export const translations = {
       noDocuments: "No documents in this case",
       caseSummary: "Case summary",
       readyForFiling: "Ready for filing work",
+      preview: "Preview",
+      open: "Open",
+      download: "Download",
+      close: "Close",
+      previewNotAvailable:
+        "No inline preview for this file type — open or download the file",
       status: {
         DRAFT: "Draft",
         IN_PROGRESS: "In progress",

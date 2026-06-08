@@ -53,6 +53,7 @@ export async function POST(request: Request, { params }: RouteParams) {
       mimeType: file.type || "application/octet-stream",
       fileSize: file.size,
       blobUrl,
+      fileData: Buffer.from(buffer),
       analyzerId,
       status: "PENDING",
     },
