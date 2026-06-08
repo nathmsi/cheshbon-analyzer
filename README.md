@@ -21,15 +21,35 @@ Ouvrir [http://localhost:3000](http://localhost:3000)
 
 ## Déploiement sur Vercel
 
-1. Push le repo sur GitHub
-2. Aller sur [vercel.com/new](https://vercel.com/new)
-3. Importer le repo — Vercel détecte Next.js automatiquement
-4. Deploy
+**Repo GitHub :** https://github.com/nathmsi/cheshbon-analyzer
 
-Ou en CLI :
+**Déploiement en 1 clic :**
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fnathmsi%2Fcheshbon-analyzer&project-name=cheshbon-analyzer)
+
+Ou manuellement :
+
+1. Aller sur [vercel.com/new](https://vercel.com/new)
+2. Importer `nathmsi/cheshbon-analyzer` — Vercel détecte Next.js automatiquement
+3. Cliquer Deploy
+
+Ou en CLI (après `npx vercel login`) :
 
 ```bash
-npx vercel
+npx vercel --prod
+```
+
+## Fichiers de test
+
+Des fichiers Excel d'exemple sont disponibles sur la page d'accueil ou dans `public/samples/` :
+
+- `sample-pay-slip.xlsx` — תלוש שכר (יוסי כהן)
+- `sample-form-106.xlsx` — טופס 106 שנת 2024
+
+Regénérer les samples :
+
+```bash
+npm run generate-samples
 ```
 
 ## Ajouter un nouvel analyseur
