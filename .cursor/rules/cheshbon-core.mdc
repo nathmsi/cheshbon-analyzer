@@ -1,0 +1,34 @@
+---
+description: Cheshbon Analyzer core conventions — read docs, two flows, Prisma, i18n
+alwaysApply: true
+---
+
+# Cheshbon Analyzer — Core Rules
+
+Read `docs/for-ai-agents.md` before non-trivial changes.
+
+## Two analysis flows (never merge)
+
+- `/analyze/*` → **client-side only**, files stay in browser
+- `/cases/*` → **server-side**, auth required, stored in Postgres
+
+## Stack gotchas
+
+- **Next.js 16** — check `node_modules/next/dist/docs/`; async `params` as Promise
+- **Prisma lazy proxy** — `src/lib/db/prisma.ts`; use `isDatabaseConfigured()` in APIs
+- **Auth split** — `auth.config.ts` (middleware) vs `auth.ts` (Credentials + adapter)
+
+## i18n (mandatory for UI copy)
+
+Add **both** `he` and `en` in `src/lib/i18n/translations.ts`. Never hardcode user-facing strings.
+
+## New analyzer checklist
+
+1. `src/lib/analyzers/<id>.ts`
+2. Register in `registry.ts`
+3. Translations in `translations.ts`
+4. E2E smoke test (see `e2e-required` rule)
+
+## Scope
+
+Minimal diffs. Match existing patterns. Commit only when user asks.

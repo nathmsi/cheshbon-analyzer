@@ -1,0 +1,32 @@
+---
+description: API routes and auth patterns for case and auth endpoints
+globs: src/app/api/**/*.ts,src/middleware.ts,src/auth*.ts,src/lib/auth/**/*.ts
+alwaysApply: false
+---
+
+# API & Auth Rules
+
+## Every case API route
+
+```ts
+if (!isDatabaseConfigured()) {
+  return NextResponse.json({ error: "Database not configured" }, { status: 503 });
+}
+const userId = await requireAuthUserId();
+const caseRecord = await getOwnedCase(caseId, userId); // for [id] routes
+```
+
+Never trust client-sent `userId`. Always filter by session.
+
+## Middleware
+
+Protected: `/cases/*`, `/api/cases/*` only. Do not protect `/analyze/*` or `/api/auth/*`.
+
+## Registration vs login
+
+- Register: `POST /api/auth/register` (bcrypt in route)
+- Login: NextAuth Credentials in `src/auth.ts`
+
+## Production auth
+
+`AUTH_SECRET` required on Vercel. Missing → "Server error" page.

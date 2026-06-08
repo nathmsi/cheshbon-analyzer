@@ -1,0 +1,29 @@
+---
+description: React UI components — testids, i18n, existing design tokens
+globs: src/components/**/*.tsx,src/app/**/*.tsx
+alwaysApply: false
+---
+
+# React UI Rules
+
+## Translations
+
+Use `useLanguage()` → `t.*`. No hardcoded Hebrew/English in JSX.
+
+## data-testid (required for new UI)
+
+Interactive or assertable elements need kebab-case test IDs:
+
+```tsx
+<Button data-testid="case-upload-btn">...</Button>
+<section data-testid="analysis-results">...</section>
+```
+
+## Styling
+
+Use CSS variables from `globals.css`: `--brand`, `--surface`, `--heading`, `--muted`.
+Reuse `components/ui/` (Button, Card, Badge). Match header/analyzer card patterns.
+
+## Client components
+
+Add `"use client"` only when using hooks, events, or browser APIs.

@@ -25,8 +25,13 @@ export default function NewCasePage() {
       const res = await fetch("/api/cases", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "same-origin",
         body: JSON.stringify(form),
       });
+      if (res.status === 401) {
+        router.push("/login?callbackUrl=/cases/new");
+        return;
+      }
       if (!res.ok) throw new Error(await res.text());
       const data = await res.json();
       router.push(`/cases/${data.id}`);

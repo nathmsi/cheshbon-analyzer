@@ -62,14 +62,17 @@ npm run generate-samples
 ## Structure
 
 ```
+docs/                   # Full project documentation (for humans & AI)
 src/
-  app/                    # Pages Next.js
-  components/             # UI components
+  app/                  # Pages Next.js
+  components/           # UI components
   lib/
-    analyzers/            # Moteur d'analyse (extensible)
-    i18n/                 # Traductions HE/EN
-    utils/                # Helpers
+    analyzers/          # Moteur d'analyse (extensible)
+    i18n/               # Traductions HE/EN
+    utils/              # Helpers
 ```
+
+📖 **Documentation complète :** voir le dossier [`docs/`](./docs/README.md)
 
 ## Tech Stack
 

@@ -1,14 +1,19 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
-import { prisma } from "@/lib/db/prisma";
+import { prisma, isDatabaseConfigured } from "@/lib/db/prisma";
 
 export async function getAuthUserId(): Promise<string | null> {
-  const session = await auth();
-  return session?.user?.id ?? null;
+  try {
+    const session = await auth();
+    return session?.user?.id ?? null;
+  } catch (error) {
+    console.error("[auth] session lookup failed", error);
+    return null;
+  }
 }
 
-export function unauthorizedResponse() {
-  return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+export function unauthorizedResponse(message = "Unauthorized") {
+  return NextResponse.json({ error: message }, { status: 401 });
 }
 
 export async function requireAuthUserId(): Promise<string | NextResponse> {
@@ -16,6 +21,20 @@ export async function requireAuthUserId(): Promise<string | NextResponse> {
   if (!userId) {
     return unauthorizedResponse();
   }
+
+  if (!isDatabaseConfigured()) {
+    return NextResponse.json({ error: "Database not configured" }, { status: 503 });
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { id: true },
+  });
+
+  if (!user) {
+    return unauthorizedResponse("Session expired. Please sign in again.");
+  }
+
   return userId;
 }
 

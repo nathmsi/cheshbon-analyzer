@@ -1,0 +1,56 @@
+---
+description: Require a basic Playwright E2E test for every new user-facing feature
+alwaysApply: true
+---
+
+# E2E Tests — Required on New Features
+
+Every **user-facing feature** MUST ship with at least **one basic Playwright test** in `e2e/`.
+
+## When it applies
+
+- New page, route, or major UI flow
+- New analyzer or case workflow step
+- Auth/login/register UI changes
+- Navigation or critical button behavior
+
+**Skip only** for pure refactors, copy tweaks, or internal-only changes — say so explicitly.
+
+## Minimum “basic” test
+
+At least one of:
+
+1. **Smoke** — page loads + key `data-testid` visible
+2. **Happy path** — one user action + expected URL or content
+
+```ts
+test("register page renders form", async ({ page }) => {
+  await page.goto("/register");
+  await expect(page.getByTestId("register-email")).toBeVisible();
+});
+```
+
+## UI requirements
+
+Add stable `data-testid` on new interactive elements (buttons, forms, modals, results).
+
+Existing examples: `upload-zone`, `analysis-results`, `confidence-badge`, `back-home`.
+
+## File location
+
+- Default: extend `e2e/app.spec.ts` or add `e2e/<feature>.spec.ts`
+- Use `public/samples/` for file-upload tests
+- Locale default is `he-IL` (playwright.config.ts)
+
+## Before finishing
+
+```bash
+npm run build
+npm run test:e2e
+```
+
+Port **3100** must be free. CI runs the same suite on every push to `main`.
+
+## Auth-protected features (`/cases/*`)
+
+Prefer a basic test. If blocked by auth setup, add the test skeleton + `test.skip` with a TODO — but default is to implement login helper or document the gap in the PR.
