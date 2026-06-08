@@ -67,8 +67,17 @@ export function CaseDetailClient({ id }: { id: string }) {
   }, [id]);
 
   useEffect(() => {
-    load();
-  }, [load]);
+    let cancelled = false;
+    void (async () => {
+      const res = await fetch(`/api/cases/${id}`);
+      if (cancelled) return;
+      if (res.ok) setData(await res.json());
+      setLoading(false);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [id]);
 
   const uploadFile = async (file: File) => {
     setUploading(true);

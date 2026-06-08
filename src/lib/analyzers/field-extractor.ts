@@ -189,7 +189,7 @@ export function extractFieldsFromWorkbook(
 
             let extracted: string | null = null;
             let confidence: FieldValue["confidence"] = "medium";
-            let source = `${sheetName}!R${rowIndex + 1}C${colIndex + 1}`;
+            const source = `${sheetName}!R${rowIndex + 1}C${colIndex + 1}`;
 
             if (pattern.type === "text") {
               if (rightValue && !labelsMatch(rightValue, pattern.labels)) {

@@ -6,7 +6,7 @@ import {
   useContext,
   useEffect,
   useMemo,
-  useState,
+  useSyncExternalStore,
 } from "react";
 import { translations, type Locale, type TranslationKey } from "./translations";
 
@@ -20,21 +20,35 @@ type LanguageContextValue = {
 
 const LanguageContext = createContext<LanguageContextValue | null>(null);
 
-export function LanguageProvider({ children }: { children: React.ReactNode }) {
-  const [locale, setLocaleState] = useState<Locale>("he");
+const LOCALE_EVENT = "cheshbon-locale-change";
 
-  useEffect(() => {
-    const saved = localStorage.getItem("cheshbon-locale") as Locale | null;
-    if (saved === "he" || saved === "en") {
-      setLocaleState(saved);
-    }
-  }, []);
+function getLocaleSnapshot(): Locale {
+  const saved = localStorage.getItem("cheshbon-locale");
+  return saved === "en" ? "en" : "he";
+}
+
+function subscribeLocale(onStoreChange: () => void) {
+  const handler = () => onStoreChange();
+  window.addEventListener("storage", handler);
+  window.addEventListener(LOCALE_EVENT, handler);
+  return () => {
+    window.removeEventListener("storage", handler);
+    window.removeEventListener(LOCALE_EVENT, handler);
+  };
+}
+
+export function LanguageProvider({ children }: { children: React.ReactNode }) {
+  const locale = useSyncExternalStore(
+    subscribeLocale,
+    getLocaleSnapshot,
+    () => "he" as Locale,
+  );
 
   const setLocale = useCallback((next: Locale) => {
-    setLocaleState(next);
     localStorage.setItem("cheshbon-locale", next);
     document.documentElement.lang = next;
     document.documentElement.dir = next === "he" ? "rtl" : "ltr";
+    window.dispatchEvent(new Event(LOCALE_EVENT));
   }, []);
 
   useEffect(() => {

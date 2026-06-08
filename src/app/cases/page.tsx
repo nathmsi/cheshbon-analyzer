@@ -33,7 +33,6 @@ export default function CasesPage() {
   const Chevron = isRtl ? ChevronLeft : ChevronRight;
 
   const load = useCallback(async () => {
-    setLoading(true);
     try {
       const res = await fetch("/api/cases");
       if (!res.ok) throw new Error(await res.text());
@@ -47,8 +46,24 @@ export default function CasesPage() {
   }, []);
 
   useEffect(() => {
-    load();
-  }, [load]);
+    let cancelled = false;
+    void (async () => {
+      try {
+        const res = await fetch("/api/cases");
+        if (cancelled) return;
+        if (!res.ok) throw new Error(await res.text());
+        setCases(await res.json());
+        setError(null);
+      } catch (e) {
+        if (!cancelled) setError(e instanceof Error ? e.message : "Error");
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   return (
     <div className="animate-in space-y-6" data-testid="cases-page">
