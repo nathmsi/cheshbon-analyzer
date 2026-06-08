@@ -1,6 +1,13 @@
 import type { Locale } from "@/lib/i18n/translations";
 
-export type AnalyzerId = "pay-slip" | "form-106" | "client-status" | "generic";
+export type AnalyzerId =
+  | "pay-slip"
+  | "form-106"
+  | "client-status"
+  | "generic"
+  | "advance-tax"
+  | "national-insurance"
+  | "bank-report";
 
 export type FieldValue = {
   key: string;

@@ -1,0 +1,58 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum CaseStatus {
+  DRAFT
+  IN_PROGRESS
+  READY
+  FILED
+}
+
+enum DocumentStatus {
+  PENDING
+  ANALYZED
+  ERROR
+}
+
+model ClientCase {
+  id          String     @id @default(cuid())
+  clientName  String     @map("client_name")
+  clientIdNum String?    @map("client_id_num")
+  taxYear     Int        @map("tax_year")
+  status      CaseStatus @default(DRAFT)
+  notes       String?
+  createdAt   DateTime   @default(now()) @map("created_at")
+  updatedAt   DateTime   @updatedAt @map("updated_at")
+  documents   Document[]
+
+  @@index([taxYear])
+  @@index([clientName])
+  @@map("client_cases")
+}
+
+model Document {
+  id           String         @id @default(cuid())
+  caseId       String         @map("case_id")
+  case         ClientCase     @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  fileName     String         @map("file_name")
+  mimeType     String         @map("mime_type")
+  fileSize     Int            @map("file_size")
+  blobUrl      String?        @map("blob_url")
+  fileData      Bytes?         @map("file_data")
+  analyzerId   String         @map("analyzer_id")
+  status       DocumentStatus @default(PENDING)
+  analysisJson Json?          @map("analysis_json")
+  errorMessage String?        @map("error_message")
+  analyzedAt   DateTime?      @map("analyzed_at")
+  createdAt    DateTime       @default(now()) @map("created_at")
+
+  @@index([caseId])
+  @@index([analyzerId])
+  @@map("documents")
+}

@@ -18,10 +18,7 @@ const ACCEPTED_MIME = [
   "application/vnd.ms-excel",
   "text/csv",
   "application/pdf",
-  ".xlsx",
-  ".xls",
-  ".csv",
-  ".pdf",
+  ".xlsx", ".xls", ".csv", ".pdf",
 ].join(",");
 
 function FileIcon({ fileName, className }: { fileName: string; className?: string }) {
@@ -36,7 +33,7 @@ export function FileUploadZone({
   selectedFile,
   onClear,
 }: FileUploadZoneProps) {
-  const { t } = useLanguage();
+  const { t, isRtl } = useLanguage();
   const [isDragging, setIsDragging] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -60,21 +57,16 @@ export function FileUploadZone({
 
   if (selectedFile) {
     return (
-      <div
-        className="file-selected flex items-center gap-4 rounded-2xl p-6"
-        data-testid="file-selected"
-      >
-        <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-[var(--brand-light)] text-[var(--brand)]">
+      <div className="file-selected flex items-center gap-4 p-5" data-testid="file-selected">
+        <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-[var(--brand)] text-white">
           {isAnalyzing ? (
-            <Loader2 className="h-8 w-8 animate-spin" data-testid="analyzing-spinner" />
+            <Loader2 className="h-7 w-7 animate-spin" data-testid="analyzing-spinner" />
           ) : (
-            <FileIcon fileName={selectedFile.name} className="h-8 w-8" />
+            <FileIcon fileName={selectedFile.name} className="h-7 w-7" />
           )}
         </div>
         <div className="min-w-0 flex-1">
-          <p className="truncate text-lg font-semibold text-heading">
-            {selectedFile.name}
-          </p>
+          <p className="truncate font-semibold text-heading">{selectedFile.name}</p>
           <p className="text-sm text-muted">
             {isAnalyzing
               ? t.analyze.analyzing
@@ -84,8 +76,8 @@ export function FileUploadZone({
         {!isAnalyzing && onClear && (
           <button
             onClick={onClear}
-            aria-label="Clear file"
-            className="rounded-xl p-2.5 text-muted transition-colors hover:bg-[var(--surface-hover)] hover:text-heading"
+            aria-label="Clear"
+            className="rounded-lg p-2 text-muted hover:bg-[var(--surface-hover)] hover:text-heading"
           >
             <X className="h-5 w-5" />
           </button>
@@ -96,15 +88,12 @@ export function FileUploadZone({
 
   return (
     <div
-      onDragOver={(e) => {
-        e.preventDefault();
-        setIsDragging(true);
-      }}
+      onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
       onDragLeave={() => setIsDragging(false)}
       onDrop={onDrop}
       onClick={() => inputRef.current?.click()}
       className={cn(
-        "upload-zone flex cursor-pointer flex-col items-center justify-center gap-5 p-12 sm:p-16",
+        "upload-zone flex cursor-pointer flex-col items-center justify-center gap-4 p-10 sm:p-14",
         isDragging && "dragging",
       )}
       data-testid="upload-zone"
@@ -120,14 +109,17 @@ export function FileUploadZone({
           if (file) handleFile(file);
         }}
       />
-      <div className="flex h-20 w-20 items-center justify-center rounded-3xl bg-[var(--surface)] shadow-md ring-1 ring-[var(--border)]">
-        <Upload className="h-9 w-9 text-[var(--brand)]" />
+      <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-[var(--border)] bg-[var(--surface)] shadow-sm">
+        <Upload className="h-8 w-8 text-[var(--brand)]" />
       </div>
-      <div className="max-w-sm text-center">
-        <p className="text-xl font-bold text-heading">{t.analyze.uploadTitle}</p>
-        <p className="mt-2 text-[15px] text-muted">{t.analyze.uploadSubtitle}</p>
-        <p className="mt-3 inline-block rounded-full bg-[var(--surface-hover)] px-4 py-1.5 text-xs font-medium text-muted">
+      <div className="text-center">
+        <p className="text-lg font-bold text-heading">{t.analyze.uploadTitle}</p>
+        <p className="mt-1.5 text-sm text-muted">{t.analyze.uploadSubtitle}</p>
+        <p className="mt-3 inline-block rounded-md border border-[var(--border)] bg-[var(--surface)] px-3 py-1.5 text-xs font-semibold text-muted">
           {t.analyze.supportedFormats}
+        </p>
+        <p className="mt-2 text-xs text-muted">
+          {isRtl ? "גרור קובץ לכאן או לחץ לבחירה" : "Drag & drop or click to browse"}
         </p>
       </div>
     </div>

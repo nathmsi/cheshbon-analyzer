@@ -2,15 +2,51 @@
 
 import { useCallback, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, ArrowRight, FileSearch } from "lucide-react";
 import { useLanguage } from "@/lib/i18n/language-context";
 import { getAnalyzer } from "@/lib/analyzers/registry";
 import { parseFile } from "@/lib/analyzers/excel-parser";
 import type { AnalysisResult, AnalyzerId } from "@/lib/analyzers/types";
 import { FileUploadZone } from "@/components/analyze/file-upload-zone";
 import { AnalysisResults } from "@/components/analyze/analysis-results";
+import { Breadcrumbs, AnalyzeSidebar } from "@/components/layout/breadcrumbs";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+
+const tipsHe: Record<string, string[]> = {
+  "pay-slip": [
+    "העלה תלוש שכר בפורמט Excel, CSV או PDF",
+    "המערכת תזהה אוטומטית: ברוטו, נטו, מסים וניכויים",
+    "לחץ «העתק סיכום» לשליחה ללקוח או לתיק",
+  ],
+  "form-106": [
+    "העלה טופס 106 בפורמט Excel, CSV או PDF",
+    "יזוהו הכנסות שנתיות, מס שנוכה ונקודות זיכוי",
+    "בדוק שיעור מס אפקטивי והפרשות פנסיה",
+  ],
+  generic: [
+    "מתאים לכל קובץ Excel או PDF לא מובנה",
+    "המערכת תזהה עמודות ותחלץ נתונים",
+  ],
+  "client-status": ["העלה קובץ Excel עם נתוני לקוח"],
+};
+
+const tipsEn: Record<string, string[]> = {
+  "pay-slip": [
+    "Upload a pay slip as Excel, CSV or PDF",
+    "Auto-detects: gross, net, taxes and deductions",
+    "Click «Copy summary» to send to client or file",
+  ],
+  "form-106": [
+    "Upload Form 106 as Excel, CSV or PDF",
+    "Detects annual income, tax withheld and credit points",
+    "Check effective tax rate and pension contributions",
+  ],
+  generic: [
+    "Works with any unstructured Excel or PDF file",
+    "System detects columns and extracts data",
+  ],
+  "client-status": ["Upload an Excel file with client data"],
+};
 
 export function AnalyzePageClient({ type }: { type: string }) {
   const analyzerId = type as AnalyzerId;
@@ -22,17 +58,15 @@ export function AnalyzePageClient({ type }: { type: string }) {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const BackArrow = isRtl ? ArrowRight : ArrowLeft;
+  const tips = (isRtl ? tipsHe : tipsEn)[analyzerId] ?? [];
 
   const handleAnalyze = useCallback(
     async (selectedFile: File) => {
       if (!analyzer) return;
-
       setFile(selectedFile);
       setIsAnalyzing(true);
       setError(null);
       setResult(null);
-
       try {
         const workbook = await parseFile(selectedFile);
         const analysis = analyzer.analyze(workbook, locale);
@@ -57,10 +91,7 @@ export function AnalyzePageClient({ type }: { type: string }) {
     return (
       <div className="text-center">
         <p className="text-muted">Analyzer not found</p>
-        <Link
-          href="/"
-          className="mt-4 inline-block text-[var(--brand)] hover:underline"
-        >
+        <Link href="/" className="mt-4 inline-block text-[var(--brand)] hover:underline">
           {t.analyze.backToHome}
         </Link>
       </div>
@@ -69,31 +100,36 @@ export function AnalyzePageClient({ type }: { type: string }) {
 
   const analyzerInfo = t.analyzers[analyzerId];
 
+  if (result) {
+    return (
+      <div className="animate-in space-y-5" data-testid={`analyze-page-${analyzerId}`}>
+        <Breadcrumbs
+          items={[
+            { label: t.nav.home, href: "/" },
+            { label: analyzerInfo.title },
+          ]}
+        />
+        <AnalysisResults result={result} onReset={handleReset} fileName={file?.name} />
+      </div>
+    );
+  }
+
   return (
-    <div className="animate-in space-y-8" data-testid={`analyze-page-${analyzerId}`}>
-      <div className="panel p-6">
-        <Link
-          href="/"
-          className="mb-4 inline-flex items-center gap-1.5 text-sm font-medium text-muted transition-colors hover:text-[var(--brand)]"
-          data-testid="back-home"
-        >
-          <BackArrow className="h-4 w-4" />
-          {t.analyze.backToHome}
-        </Link>
-        <div className="flex items-start gap-4">
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[var(--brand-light)] text-[var(--brand)]">
-            <FileSearch className="h-6 w-6" />
-          </div>
-          <div>
-            <h1 className="text-3xl font-bold text-heading">{analyzerInfo.title}</h1>
-            <p className="mt-2 max-w-2xl text-[15px] leading-relaxed text-muted">
-              {analyzerInfo.description}
-            </p>
-          </div>
-        </div>
+    <div className="animate-in space-y-6" data-testid={`analyze-page-${analyzerId}`}>
+      <div>
+        <Breadcrumbs
+          items={[
+            { label: t.nav.home, href: "/" },
+            { label: analyzerInfo.title },
+          ]}
+        />
+        <h1 className="text-2xl font-bold text-heading sm:text-3xl">
+          {analyzerInfo.title}
+        </h1>
+        <p className="mt-1.5 max-w-2xl text-sm text-muted">{analyzerInfo.description}</p>
       </div>
 
-      {!result && (
+      <div className="grid gap-5 lg:grid-cols-[1fr_280px]">
         <Card>
           <CardContent className="p-4 sm:p-6">
             <FileUploadZone
@@ -104,11 +140,13 @@ export function AnalyzePageClient({ type }: { type: string }) {
             />
           </CardContent>
         </Card>
-      )}
+
+        {tips.length > 0 && <AnalyzeSidebar tips={tips} />}
+      </div>
 
       {error && (
         <Card className="error-panel" data-testid="analysis-error">
-          <CardContent className="p-6">
+          <CardContent className="p-5">
             <p className="font-semibold text-[var(--danger)]">{t.analyze.errorTitle}</p>
             <p className="mt-1 text-sm text-muted">{error}</p>
             <Button variant="outline" size="sm" className="mt-4" onClick={handleReset}>
@@ -116,17 +154,6 @@ export function AnalyzePageClient({ type }: { type: string }) {
             </Button>
           </CardContent>
         </Card>
-      )}
-
-      {result && (
-        <>
-          <AnalysisResults result={result} />
-          <div className="flex justify-center pt-2">
-            <Button onClick={handleReset} data-testid="analyze-another-btn">
-              {t.analyze.analyzeAnother}
-            </Button>
-          </div>
-        </>
       )}
     </div>
   );

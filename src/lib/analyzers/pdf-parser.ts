@@ -84,14 +84,20 @@ export function textItemsToWorkbook(
 }
 
 export async function parsePdfFile(file: File): Promise<ParsedWorkbook> {
+  const buffer = await file.arrayBuffer();
+  return parsePdfBuffer(buffer);
+}
+
+export async function parsePdfBuffer(buffer: ArrayBuffer): Promise<ParsedWorkbook> {
   const pdfjs = await import("pdfjs-dist");
 
   if (typeof window !== "undefined") {
     pdfjs.GlobalWorkerOptions.workerSrc = "/pdf.worker.mjs";
+  } else {
+    pdfjs.GlobalWorkerOptions.workerSrc = "";
   }
 
-  const buffer = await file.arrayBuffer();
-  const pdf = await pdfjs.getDocument({ data: buffer }).promise;
+  const pdf = await pdfjs.getDocument({ data: buffer, useSystemFonts: true }).promise;
 
   const pageRows: string[][][] = [];
 

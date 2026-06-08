@@ -10,7 +10,7 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
     <ThemeProvider>
       <LanguageProvider>
         <Header />
-        <main className="mx-auto min-h-[calc(100vh-8rem)] max-w-6xl px-4 py-8 sm:px-6 lg:py-12">
+        <main className="app-main mx-auto min-h-[calc(100vh-7rem)] px-4 py-6 sm:px-6 sm:py-8">
           {children}
         </main>
         <Footer />

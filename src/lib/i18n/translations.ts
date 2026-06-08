@@ -9,11 +9,13 @@ export const translations = {
     nav: {
       home: "בית",
       analyzers: "סוגי ניתוח",
+      cases: "תיקים",
     },
 
     home: {
       welcome: "ברוכים הבאים",
       subtitle: "בחר סוג ניתוח, העלה קובץ Excel, CSV או PDF, וקבל דוח מפורט מיד",
+      primaryTools: "כלים עיקריים",
       availableAnalyzers: "ניתוחים זמינים",
       comingSoon: "בקרוב",
       howItWorks: "איך זה עובד?",
@@ -42,6 +44,49 @@ export const translations = {
         title: "ניתוח כללי",
         description: "ניתוח אוטומטי של כל קובץ Excel — מזהה מבנה ומחלץ נתונים",
         shortDesc: "ניתוח כללי",
+      },
+      "advance-tax": {
+        title: "מקדמות מס",
+        description: "ניתוח דוח מקדמות — תשלומים, יתרות וחובות",
+        shortDesc: "מקדמות",
+      },
+      "national-insurance": {
+        title: "ביטוח לאומי",
+        description: "ניתוח דוח ביטוח לאומי — הפרשות ויתרות",
+        shortDesc: "ביטוח לאומי",
+      },
+      "bank-report": {
+        title: "דוח בנק",
+        description: "ניתוח דוח בנק — תנועות ויתרות (בקרוב)",
+        shortDesc: "דוח בנק",
+      },
+    },
+
+    cases: {
+      label: "ניהול תיקים",
+      title: "תיקי לקוחות",
+      subtitle: "נהל תיקי מס, העלה מסמכים וקבל סיכום מוכן להגשה",
+      newCase: "תיק חדש",
+      create: "צור תיק",
+      back: "חזרה לתיקים",
+      taxYear: "שנת מס",
+      clientName: "שם לקוח",
+      notes: "הערות",
+      documents: "מסמכים",
+      empty: "אין תיקים עדיין — צור תיק ראשון",
+      dbError: "שגיאת חיבור לבסיס הנתונים — בדוק הגדרות",
+      createError: "שגיאה ביצירת תיק",
+      notFound: "תיק לא נמצא",
+      addDocument: "הוסף מסמך",
+      uploadAndAnalyze: "העלה ונתח",
+      noDocuments: "אין מסמכים בתיק",
+      caseSummary: "סיכום תיק",
+      readyForFiling: "מוכן לעבודה על ההגשה",
+      status: {
+        DRAFT: "טיוטה",
+        IN_PROGRESS: "בעבודה",
+        READY: "מוכן",
+        FILED: "הוגש",
       },
     },
 
@@ -131,12 +176,14 @@ export const translations = {
     nav: {
       home: "Home",
       analyzers: "Analysis Types",
+      cases: "Cases",
     },
 
     home: {
       welcome: "Welcome",
       subtitle:
         "Choose an analysis type, upload an Excel, CSV or PDF file, and get a detailed report instantly",
+      primaryTools: "Primary tools",
       availableAnalyzers: "Available Analyses",
       comingSoon: "Coming Soon",
       howItWorks: "How it works",
@@ -167,6 +214,49 @@ export const translations = {
         description:
           "Automatic analysis of any Excel file — detects structure and extracts data",
         shortDesc: "Generic",
+      },
+      "advance-tax": {
+        title: "Advance Tax",
+        description: "Advance tax report analysis — payments, balances and debts",
+        shortDesc: "Advance tax",
+      },
+      "national-insurance": {
+        title: "National Insurance",
+        description: "National insurance report — contributions and balances",
+        shortDesc: "National Ins.",
+      },
+      "bank-report": {
+        title: "Bank Report",
+        description: "Bank statement analysis — transactions and balances (coming soon)",
+        shortDesc: "Bank report",
+      },
+    },
+
+    cases: {
+      label: "Case management",
+      title: "Client cases",
+      subtitle: "Manage tax cases, upload documents and get filing-ready summaries",
+      newCase: "New case",
+      create: "Create case",
+      back: "Back to cases",
+      taxYear: "Tax year",
+      clientName: "Client name",
+      notes: "Notes",
+      documents: "Documents",
+      empty: "No cases yet — create your first case",
+      dbError: "Database connection error — check configuration",
+      createError: "Failed to create case",
+      notFound: "Case not found",
+      addDocument: "Add document",
+      uploadAndAnalyze: "Upload & analyze",
+      noDocuments: "No documents in this case",
+      caseSummary: "Case summary",
+      readyForFiling: "Ready for filing work",
+      status: {
+        DRAFT: "Draft",
+        IN_PROGRESS: "In progress",
+        READY: "Ready",
+        FILED: "Filed",
       },
     },
 
