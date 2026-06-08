@@ -109,6 +109,7 @@ export const translations = {
     },
 
     analyze: {
+      uploadTitle: "העלאת קובץ",
       uploadSubtitle: "גרור קובץ לכאן או לחץ לבחירה",
       supportedFormats: "Excel (.xlsx, .xls), CSV ו-PDF",
       analyzing: "מנתח את הקובץ...",
@@ -281,6 +282,18 @@ export const translations = {
         READY: "Ready",
         FILED: "Filed",
       },
+    },
+
+    auth: {
+      label: "Sign in",
+      loginTitle: "Sign in to your account",
+      loginSubtitle: "Your cases are private — only you can access them",
+      signIn: "Sign in",
+      signOut: "Sign out",
+      signInWithGoogle: "Continue with Google",
+      account: "Account",
+      loginError: "Sign-in failed — please try again",
+      privacyNote: "Cases and documents are stored under your account only",
     },
 
     analyze: {
