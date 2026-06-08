@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
 import { prisma, isDatabaseConfigured } from "@/lib/db/prisma";
 import { buildCaseSummary } from "@/lib/cases/case-summary";
+import { buildDohShnatiDraft } from "@/lib/cases/doh-shnati-draft";
 import type { AnalysisResult } from "@/lib/analyzers/types";
+import type { ClientProfileType } from "@/lib/cases/document-checklist";
 import { getOwnedCase, requireAuthUserId } from "@/lib/auth/require-user";
 
 type RouteParams = { params: Promise<{ id: string }> };
@@ -32,6 +34,7 @@ export async function GET(_request: Request, { params }: RouteParams) {
           fileSize: true,
           blobUrl: true,
           analyzerId: true,
+          periodMonth: true,
           status: true,
           analysisJson: true,
           errorMessage: true,
@@ -70,8 +73,23 @@ export async function GET(_request: Request, { params }: RouteParams) {
     })),
   );
 
+  const dohShnati = buildDohShnatiDraft(
+    clientCase.clientName,
+    clientCase.clientIdNum,
+    clientCase.taxYear,
+    clientCase.clientProfile as ClientProfileType,
+    documents.map((d) => ({
+      id: d.id,
+      fileName: d.fileName,
+      analyzerId: d.analyzerId,
+      status: d.status,
+      periodMonth: d.periodMonth,
+      analysisJson: d.analysisJson as AnalysisResult | null,
+    })),
+  );
+
   const { documents: _docs, ...caseData } = clientCase;
-  return NextResponse.json({ ...caseData, documents, summary });
+  return NextResponse.json({ ...caseData, documents, summary, dohShnati });
 }
 
 export async function PATCH(request: Request, { params }: RouteParams) {
@@ -100,6 +118,9 @@ export async function PATCH(request: Request, { params }: RouteParams) {
       ...(body.taxYear !== undefined && { taxYear: Number(body.taxYear) }),
       ...(body.status !== undefined && { status: body.status }),
       ...(body.notes !== undefined && { notes: body.notes ? String(body.notes) : null }),
+      ...(body.clientProfile !== undefined && {
+        clientProfile: body.clientProfile === "SELF_EMPLOYED" ? "SELF_EMPLOYED" : "EMPLOYEE",
+      }),
     },
   });
 

@@ -18,8 +18,12 @@ import { useLanguage } from "@/lib/i18n/language-context";
 import { getAvailableAnalyzers } from "@/lib/analyzers/registry";
 import type { AnalysisResult } from "@/lib/analyzers/types";
 import type { CaseSummaryResult } from "@/lib/cases/case-summary";
+import type { DohShnatiDraft } from "@/lib/cases/doh-shnati-draft";
+import type { ClientProfileType } from "@/lib/cases/document-checklist";
 import { documentFileUrl } from "@/lib/cases/document-file";
 import { DocumentPreviewModal } from "@/components/cases/document-preview-modal";
+import { CaseChecklist } from "@/components/cases/case-checklist";
+import { DohShnatiDraftPanel } from "@/components/cases/doh-shnati-draft-panel";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -31,6 +35,7 @@ type CaseDocument = {
   mimeType: string;
   analyzerId: string;
   status: string;
+  periodMonth?: number | null;
   hasFile: boolean;
   analysisJson: AnalysisResult | null;
   errorMessage: string | null;
@@ -42,8 +47,10 @@ type CaseDetail = {
   clientIdNum: string | null;
   taxYear: number;
   status: string;
+  clientProfile: ClientProfileType;
   documents: CaseDocument[];
   summary: CaseSummaryResult;
+  dohShnati: DohShnatiDraft;
 };
 
 type PreviewDoc = Pick<CaseDocument, "id" | "fileName" | "mimeType">;
@@ -54,6 +61,7 @@ export function CaseDetailClient({ id }: { id: string }) {
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [selectedAnalyzer, setSelectedAnalyzer] = useState("form-106");
+  const [uploadMonth, setUploadMonth] = useState<number | null>(null);
   const [copied, setCopied] = useState(false);
   const [previewDoc, setPreviewDoc] = useState<PreviewDoc | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -79,16 +87,29 @@ export function CaseDetailClient({ id }: { id: string }) {
     };
   }, [id]);
 
-  const uploadFile = async (file: File) => {
+  const uploadFile = async (file: File, month?: number | null) => {
     setUploading(true);
     const formData = new FormData();
     formData.append("file", file);
     formData.append("analyzerId", selectedAnalyzer);
     formData.append("locale", locale);
+    if (month && month >= 1 && month <= 12) {
+      formData.append("periodMonth", String(month));
+    }
 
     await fetch(`/api/cases/${id}/documents`, { method: "POST", body: formData });
     await load();
     setUploading(false);
+    setUploadMonth(null);
+  };
+
+  const updateProfile = async (clientProfile: ClientProfileType) => {
+    await fetch(`/api/cases/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ clientProfile }),
+    });
+    await load();
   };
 
   const copySummary = async () => {
@@ -136,7 +157,48 @@ export function CaseDetailClient({ id }: { id: string }) {
             {t.cases.readyForFiling}
           </Badge>
         )}
+        <div className="mt-4 flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={() => updateProfile("EMPLOYEE")}
+            className={cn(
+              "rounded-lg border px-3 py-1 text-xs font-semibold",
+              data.clientProfile === "EMPLOYEE"
+                ? "border-white bg-white/20 text-white"
+                : "border-white/30 text-white/70",
+            )}
+            data-testid="profile-employee"
+          >
+            {t.cases.profileEmployee}
+          </button>
+          <button
+            type="button"
+            onClick={() => updateProfile("SELF_EMPLOYED")}
+            className={cn(
+              "rounded-lg border px-3 py-1 text-xs font-semibold",
+              data.clientProfile === "SELF_EMPLOYED"
+                ? "border-white bg-white/20 text-white"
+                : "border-white/30 text-white/70",
+            )}
+            data-testid="profile-self-employed"
+          >
+            {t.cases.profileSelfEmployed}
+          </button>
+        </div>
       </div>
+
+      {data.dohShnati && (
+        <CaseChecklist
+          checklist={data.dohShnati.checklist}
+          onUploadForMonth={(month) => {
+            setSelectedAnalyzer("pay-slip");
+            setUploadMonth(month);
+            fileRef.current?.click();
+          }}
+        />
+      )}
+
+      {data.dohShnati && <DohShnatiDraftPanel draft={data.dohShnati} />}
 
       {data.summary.kpis.length > 0 && (
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4" data-testid="case-summary-kpis">
@@ -211,9 +273,15 @@ export function CaseDetailClient({ id }: { id: string }) {
             data-testid="case-file-input"
             onChange={(e) => {
               const f = e.target.files?.[0];
-              if (f) uploadFile(f);
+              if (f) uploadFile(f, uploadMonth);
             }}
           />
+
+          {uploadMonth && (
+            <p className="text-sm font-semibold text-[var(--brand)]">
+              {t.cases.uploadPaySlipMonth} {uploadMonth}
+            </p>
+          )}
 
           <button
             type="button"
@@ -298,6 +366,7 @@ function DocumentRow({
         <p className="text-xs text-muted">
           {t.analyzers[doc.analyzerId as keyof typeof t.analyzers]?.shortDesc ??
             doc.analyzerId}
+          {doc.periodMonth ? ` · ${doc.periodMonth}/12` : ""}
         </p>
       </div>
 

@@ -14,6 +14,11 @@ enum CaseStatus {
   FILED
 }
 
+enum ClientProfile {
+  EMPLOYEE
+  SELF_EMPLOYED
+}
+
 enum DocumentStatus {
   PENDING
   ANALYZED
@@ -75,10 +80,11 @@ model VerificationToken {
 }
 
 model ClientCase {
-  id          String     @id @default(cuid())
-  userId      String     @map("user_id")
-  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  clientName  String     @map("client_name")
+  id            String        @id @default(cuid())
+  userId        String        @map("user_id")
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  clientProfile ClientProfile @default(EMPLOYEE) @map("client_profile")
+  clientName    String        @map("client_name")
   clientIdNum String?    @map("client_id_num")
   taxYear     Int        @map("tax_year")
   status      CaseStatus @default(DRAFT)
@@ -103,6 +109,7 @@ model Document {
   blobUrl      String?        @map("blob_url")
   fileData     Bytes?         @map("file_data")
   analyzerId   String         @map("analyzer_id")
+  periodMonth  Int?           @map("period_month")
   status       DocumentStatus @default(PENDING)
   analysisJson Json?          @map("analysis_json")
   errorMessage String?        @map("error_message")

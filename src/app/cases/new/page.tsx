@@ -16,6 +16,7 @@ export default function NewCasePage() {
     clientIdNum: "",
     taxYear: new Date().getFullYear() - 1,
     notes: "",
+    clientProfile: "EMPLOYEE" as "EMPLOYEE" | "SELF_EMPLOYED",
   });
 
   const submit = async (e: React.FormEvent) => {
@@ -91,6 +92,37 @@ export default function NewCasePage() {
                 onChange={(e) => setForm({ ...form, taxYear: Number(e.target.value) })}
                 className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-heading outline-none focus:border-[var(--brand)]"
               />
+            </div>
+            <div>
+              <label className="mb-1 block text-sm font-semibold text-heading">
+                {t.cases.clientProfile}
+              </label>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setForm({ ...form, clientProfile: "EMPLOYEE" })}
+                  className={`flex-1 rounded-lg border px-3 py-2.5 text-sm font-semibold ${
+                    form.clientProfile === "EMPLOYEE"
+                      ? "border-[var(--brand)] bg-[var(--brand-light)] text-[var(--brand)]"
+                      : "border-[var(--border)] text-muted"
+                  }`}
+                  data-testid="new-case-profile-employee"
+                >
+                  {t.cases.profileEmployee}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setForm({ ...form, clientProfile: "SELF_EMPLOYED" })}
+                  className={`flex-1 rounded-lg border px-3 py-2.5 text-sm font-semibold ${
+                    form.clientProfile === "SELF_EMPLOYED"
+                      ? "border-[var(--brand)] bg-[var(--brand-light)] text-[var(--brand)]"
+                      : "border-[var(--border)] text-muted"
+                  }`}
+                  data-testid="new-case-profile-self-employed"
+                >
+                  {t.cases.profileSelfEmployed}
+                </button>
+              </div>
             </div>
             <div>
               <label className="mb-1 block text-sm font-semibold text-heading">

@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { prisma, isDatabaseConfigured } from "@/lib/db/prisma";
 import { analyzeFileBuffer } from "@/lib/analyzers/parse-buffer";
 import type { AnalysisResult } from "@/lib/analyzers/types";
+import { detectPaySlipMonth } from "@/lib/cases/detect-pay-slip-month";
 import { getOwnedCase, requireAuthUserId } from "@/lib/auth/require-user";
 
 type RouteParams = { params: Promise<{ id: string }> };
@@ -26,6 +27,11 @@ export async function POST(request: Request, { params }: RouteParams) {
   const file = formData.get("file") as File | null;
   const analyzerId = formData.get("analyzerId") as string | null;
   const locale = (formData.get("locale") as "he" | "en") || "he";
+  const periodMonthRaw = formData.get("periodMonth");
+  const periodMonth =
+    periodMonthRaw !== null && periodMonthRaw !== ""
+      ? Number(periodMonthRaw)
+      : undefined;
 
   if (!file || !analyzerId) {
     return NextResponse.json(
@@ -66,12 +72,20 @@ export async function POST(request: Request, { params }: RouteParams) {
   try {
     const analysis = await analyzeFileBuffer(buffer, file.name, analyzerId, locale);
 
+    const resolvedPeriodMonth =
+      analyzerId === "pay-slip"
+        ? (periodMonth && periodMonth >= 1 && periodMonth <= 12
+            ? periodMonth
+            : detectPaySlipMonth(file.name, analysis))
+        : null;
+
     const updated = await prisma.document.update({
       where: { id: doc.id },
       data: {
         status: "ANALYZED",
         analysisJson: analysis as unknown as object,
         analyzedAt: new Date(),
+        ...(resolvedPeriodMonth ? { periodMonth: resolvedPeriodMonth } : {}),
       },
     });
 

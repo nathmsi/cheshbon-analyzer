@@ -51,7 +51,7 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json();
-    const { clientName, clientIdNum, taxYear, notes } = body;
+    const { clientName, clientIdNum, taxYear, notes, clientProfile } = body;
 
     if (!clientName || !taxYear) {
       return NextResponse.json(
@@ -67,6 +67,7 @@ export async function POST(request: Request) {
         clientIdNum: clientIdNum ? String(clientIdNum) : null,
         taxYear: Number(taxYear),
         notes: notes ? String(notes) : null,
+        clientProfile: clientProfile === "SELF_EMPLOYED" ? "SELF_EMPLOYED" : "EMPLOYEE",
         status: "DRAFT",
       },
     });
