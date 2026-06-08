@@ -46,7 +46,6 @@ export const FORM_106_PATTERNS: FieldPattern[] = [
       "total income",
       "total gross",
       "הכנסה כוללת",
-      "שכר חייב",
     ],
     type: "currency",
   },

@@ -38,43 +38,45 @@ export function AnalyzerCard({ id, icon, available }: AnalyzerCardProps) {
   const content = (
     <Card
       className={cn(
-        "group relative overflow-hidden transition-all duration-200",
-        available
-          ? "cursor-pointer hover:border-teal-300 hover:shadow-md hover:-translate-y-0.5"
-          : "opacity-70",
+        "group relative h-full overflow-hidden",
+        available && "cursor-pointer hover:-translate-y-1 hover:border-teal-200 hover:shadow-lg",
+        !available && "opacity-75",
       )}
+      data-testid={`analyzer-card-${id}`}
     >
-      <CardContent className="flex flex-col gap-4 p-6">
+      {available && (
+        <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-teal-500 to-blue-600 opacity-0 transition-opacity group-hover:opacity-100" />
+      )}
+      <CardContent className="flex h-full flex-col gap-5 p-6">
         <div className="flex items-start justify-between">
           <div
             className={cn(
-              "flex h-12 w-12 items-center justify-center rounded-xl",
+              "flex h-14 w-14 items-center justify-center rounded-2xl transition-colors",
               available
                 ? "bg-teal-50 text-teal-600 group-hover:bg-teal-100"
                 : "bg-slate-100 text-slate-400",
             )}
           >
-            {available ? <Icon className="h-6 w-6" /> : <Lock className="h-5 w-5" />}
+            {available ? <Icon className="h-7 w-7" /> : <Lock className="h-5 w-5" />}
           </div>
-          {!available && (
-            <Badge variant="muted">{t.home.comingSoon}</Badge>
-          )}
-          {available && (
-            <Badge variant="success">
-              {isRtl ? "זמין" : "Available"}
-            </Badge>
-          )}
+          <Badge variant={available ? "success" : "muted"}>
+            {available
+              ? isRtl
+                ? "זמין"
+                : "Available"
+              : t.home.comingSoon}
+          </Badge>
         </div>
 
-        <div>
-          <h3 className="text-lg font-semibold text-slate-900">{info.title}</h3>
-          <p className="mt-1.5 text-sm leading-relaxed text-slate-500">
+        <div className="flex-1">
+          <h3 className="text-xl font-bold text-heading">{info.title}</h3>
+          <p className="mt-2 text-[15px] leading-relaxed text-muted">
             {info.description}
           </p>
         </div>
 
         {available && (
-          <div className="flex items-center gap-1.5 text-sm font-medium text-teal-600">
+          <div className="flex items-center gap-2 text-sm font-semibold text-[var(--brand)]">
             {isRtl ? "התחל ניתוח" : "Start Analysis"}
             <Arrow className="h-4 w-4 transition-transform group-hover:translate-x-0.5 rtl:group-hover:-translate-x-0.5" />
           </div>
@@ -84,7 +86,11 @@ export function AnalyzerCard({ id, icon, available }: AnalyzerCardProps) {
   );
 
   if (available) {
-    return <Link href={`/analyze/${id}`}>{content}</Link>;
+    return (
+      <Link href={`/analyze/${id}`} data-testid={`analyzer-link-${id}`}>
+        {content}
+      </Link>
+    );
   }
 
   return content;

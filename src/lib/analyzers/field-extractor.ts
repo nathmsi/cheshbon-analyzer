@@ -157,8 +157,7 @@ function labelsMatch(cellValue: string, labels: string[]): boolean {
     const normLabel = normalize(label);
     return (
       normalized === normLabel ||
-      normalized.includes(normLabel) ||
-      normLabel.includes(normalized)
+      normalized.includes(normLabel)
     );
   });
 }

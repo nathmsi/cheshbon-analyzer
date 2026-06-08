@@ -23,24 +23,27 @@ export function SampleFilesSection() {
   const { locale, isRtl } = useLanguage();
 
   return (
-    <section>
-      <h2 className="mb-4 text-xl font-bold text-slate-900">
-        {isRtl ? "קבצים לדוגמה" : "Sample Files"}
-      </h2>
-      <p className="mb-4 text-sm text-slate-500">
-        {isRtl
-          ? "הורד קובץ לדוגמה כדי לבדוק את הניתוח"
-          : "Download a sample file to test the analysis"}
-      </p>
-      <div className="grid gap-3 sm:grid-cols-2">
+    <section data-testid="sample-files">
+      <div className="mb-5">
+        <p className="section-label mb-1">{isRtl ? "בדיקה" : "Testing"}</p>
+        <h2 className="text-2xl font-bold text-slate-900">
+          {isRtl ? "קבצים לדוגמה" : "Sample Files"}
+        </h2>
+        <p className="mt-1 text-[15px] text-slate-500">
+          {isRtl
+            ? "הורד קובץ לדוגמה כדי לבדוק את הניתוח"
+            : "Download a sample file to test the analysis"}
+        </p>
+      </div>
+      <div className="grid gap-4 sm:grid-cols-2">
         {samples.map((sample) => (
-          <Card key={sample.file} className="transition-shadow hover:shadow-md">
-            <CardContent className="flex items-center gap-4 p-4">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-teal-50 text-teal-600">
-                <FileSpreadsheet className="h-5 w-5" />
+          <Card key={sample.file} className="hover:border-teal-200 hover:shadow-md">
+            <CardContent className="flex items-center gap-4 p-5">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-teal-50 to-blue-50 text-teal-600">
+                <FileSpreadsheet className="h-6 w-6" />
               </div>
               <div className="min-w-0 flex-1">
-                <p className="font-medium text-slate-900">
+                <p className="font-semibold text-slate-900">
                   {locale === "he" ? sample.nameHe : sample.nameEn}
                 </p>
                 <p className="text-xs text-slate-400">.xlsx</p>
@@ -48,7 +51,8 @@ export function SampleFilesSection() {
               <a
                 href={sample.file}
                 download
-                className="flex items-center gap-1.5 rounded-lg bg-slate-100 px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-teal-50 hover:text-teal-700"
+                data-testid={`sample-download-${sample.analyzer}`}
+                className="flex items-center gap-1.5 rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-teal-700"
               >
                 <Download className="h-4 w-4" />
                 {isRtl ? "הורד" : "Download"}

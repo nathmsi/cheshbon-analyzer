@@ -13,12 +13,12 @@ export const translations = {
 
     home: {
       welcome: "ברוכים הבאים",
-      subtitle: "בחר סוג ניתוח, העלה קובץ Excel או CSV, וקבל דוח מפורט מיד",
+      subtitle: "בחר סוג ניתוח, העלה קובץ Excel, CSV או PDF, וקבל דוח מפורט מיד",
       availableAnalyzers: "ניתוחים זמינים",
       comingSoon: "בקרוב",
       howItWorks: "איך זה עובד?",
       step1: "בחר סוג מסמך",
-      step2: "העלה קובץ Excel / CSV",
+      step2: "העלה קובץ Excel / CSV / PDF",
       step3: "קבל ניתוח מלא עם כל הנתונים החשובים",
     },
 
@@ -48,7 +48,7 @@ export const translations = {
     analyze: {
       uploadTitle: "העלאת קובץ",
       uploadSubtitle: "גרור קובץ לכאן או לחץ לבחירה",
-      supportedFormats: "Excel (.xlsx, .xls) ו-CSV",
+      supportedFormats: "Excel (.xlsx, .xls), CSV ו-PDF",
       analyzing: "מנתח את הקובץ...",
       analyzeAnother: "נתח קובץ נוסף",
       backToHome: "חזרה לדף הבית",
@@ -136,12 +136,12 @@ export const translations = {
     home: {
       welcome: "Welcome",
       subtitle:
-        "Choose an analysis type, upload an Excel or CSV file, and get a detailed report instantly",
+        "Choose an analysis type, upload an Excel, CSV or PDF file, and get a detailed report instantly",
       availableAnalyzers: "Available Analyses",
       comingSoon: "Coming Soon",
       howItWorks: "How it works",
       step1: "Choose document type",
-      step2: "Upload Excel / CSV file",
+      step2: "Upload Excel / CSV / PDF file",
       step3: "Get a complete analysis with all key data",
     },
 
@@ -173,7 +173,7 @@ export const translations = {
     analyze: {
       uploadTitle: "Upload File",
       uploadSubtitle: "Drag a file here or click to select",
-      supportedFormats: "Excel (.xlsx, .xls) and CSV",
+      supportedFormats: "Excel (.xlsx, .xls), CSV and PDF",
       analyzing: "Analyzing file...",
       analyzeAnother: "Analyze Another File",
       backToHome: "Back to Home",

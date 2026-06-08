@@ -1,12 +1,19 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import { LanguageProvider } from "@/lib/i18n/language-context";
-import { Header } from "@/components/layout/header";
+import { Inter, Heebo } from "next/font/google";
+import { Geist_Mono } from "next/font/google";
+import { AppProviders } from "@/components/layout/app-providers";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
+  display: "swap",
+});
+
+const heebo = Heebo({
+  variable: "--font-heebo",
+  subsets: ["hebrew", "latin"],
+  display: "swap",
 });
 
 const geistMono = Geist_Mono({
@@ -17,7 +24,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Cheshbon Analyzer — ניתוח מסמכים לרואי חשבון",
   description:
-    "Smart document analysis for Israeli accountants. Upload Excel files and get instant insights.",
+    "Smart document analysis for Israeli accountants. Upload Excel, CSV or PDF files and get instant insights.",
 };
 
 export default function RootLayout({
@@ -29,16 +36,18 @@ export default function RootLayout({
     <html
       lang="he"
       dir="rtl"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${inter.variable} ${heebo.variable} ${geistMono.variable} h-full antialiased`}
       suppressHydrationWarning
     >
-      <body className="min-h-full">
-        <LanguageProvider>
-          <Header />
-          <main className="mx-auto min-h-[calc(100vh-4rem)] max-w-6xl px-4 py-8 sm:px-6">
-            {children}
-          </main>
-        </LanguageProvider>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem('cheshbon-theme');var d=t==='dark'||(!t&&window.matchMedia('(prefers-color-scheme: dark)').matches);if(d){document.documentElement.classList.add('dark');document.documentElement.style.colorScheme='dark';}}catch(e){}})();`,
+          }}
+        />
+      </head>
+      <body className="page-shell min-h-full">
+        <AppProviders>{children}</AppProviders>
       </body>
     </html>
   );

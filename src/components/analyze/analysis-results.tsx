@@ -7,6 +7,7 @@ import {
   Info,
   Copy,
   Check,
+  TrendingUp,
 } from "lucide-react";
 import { useLanguage } from "@/lib/i18n/language-context";
 import type { AnalysisResult } from "@/lib/analyzers/types";
@@ -74,13 +75,22 @@ export function AnalysisResults({ result }: AnalysisResultsProps) {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="animate-in space-y-6" data-testid="analysis-results">
       {/* Summary header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="panel flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-slate-900">{result.summary.title}</h2>
-          <div className="mt-2 flex flex-wrap items-center gap-2">
-            <Badge variant={conf.variant}>
+          <div className="mb-2 flex items-center gap-2">
+            <TrendingUp className="h-5 w-5 text-[var(--brand)]" />
+            <p className="section-label">{t.results.summary}</p>
+          </div>
+          <h2
+            className="text-2xl font-bold text-heading sm:text-3xl"
+            data-testid="result-title"
+          >
+            {result.summary.title}
+          </h2>
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            <Badge variant={conf.variant} data-testid="confidence-badge">
               {t.results.confidence}: {conf.label}
             </Badge>
             <Badge variant="muted">
@@ -91,7 +101,12 @@ export function AnalysisResults({ result }: AnalysisResultsProps) {
             </Badge>
           </div>
         </div>
-        <Button variant="outline" size="sm" onClick={copySummary}>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={copySummary}
+          data-testid="copy-summary-btn"
+        >
           {copied ? (
             <>
               <Check className="h-4 w-4" />
@@ -108,21 +123,24 @@ export function AnalysisResults({ result }: AnalysisResultsProps) {
 
       {/* KPI cards */}
       {result.summary.kpis.length > 0 && (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div
+          className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4"
+          data-testid="kpi-grid"
+        >
           {result.summary.kpis.map((kpi) => (
             <Card
               key={kpi.label}
-              className={cn(
-                kpi.highlight && "border-teal-200 bg-gradient-to-br from-teal-50 to-white",
-              )}
+              className={cn(kpi.highlight && "kpi-highlight")}
+              data-testid={`kpi-${kpi.label}`}
             >
               <CardContent className="p-5">
-                <p className="text-sm text-slate-500">{kpi.label}</p>
+                <p className="text-sm font-medium text-muted">{kpi.label}</p>
                 <p
                   className={cn(
-                    "mt-1 text-2xl font-bold",
-                    kpi.highlight ? "text-teal-700" : "text-slate-900",
+                    "mt-2 text-2xl font-extrabold tracking-tight sm:text-3xl",
+                    kpi.highlight ? "text-[var(--brand)]" : "text-heading",
                   )}
+                  data-testid="kpi-value"
                 >
                   {kpi.value}
                 </p>
@@ -136,7 +154,7 @@ export function AnalysisResults({ result }: AnalysisResultsProps) {
       {result.insights.length > 0 && (
         <Card>
           <CardHeader>
-            <h3 className="font-semibold text-slate-900">{t.results.insights}</h3>
+            <h3 className="text-lg font-bold text-heading">{t.results.insights}</h3>
           </CardHeader>
           <CardContent className="space-y-3 pt-0">
             {result.insights.map((insight, i) => (
@@ -144,10 +162,11 @@ export function AnalysisResults({ result }: AnalysisResultsProps) {
                 key={i}
                 className={cn(
                   "flex items-start gap-3 rounded-xl p-4",
-                  insight.type === "success" && "bg-emerald-50 text-emerald-800",
-                  insight.type === "warning" && "bg-amber-50 text-amber-800",
-                  insight.type === "info" && "bg-blue-50 text-blue-800",
+                  insight.type === "success" && "insight-success",
+                  insight.type === "warning" && "insight-warning",
+                  insight.type === "info" && "insight-info",
                 )}
+                data-testid={`insight-${i}`}
               >
                 {insight.type === "success" && (
                   <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0" />
@@ -158,7 +177,7 @@ export function AnalysisResults({ result }: AnalysisResultsProps) {
                 {insight.type === "info" && (
                   <Info className="mt-0.5 h-5 w-5 shrink-0" />
                 )}
-                <p className="text-sm leading-relaxed">{insight.message}</p>
+                <p className="text-[15px] leading-relaxed">{insight.message}</p>
               </div>
             ))}
           </CardContent>
@@ -166,43 +185,40 @@ export function AnalysisResults({ result }: AnalysisResultsProps) {
       )}
 
       {/* Detail sections */}
-      {result.sections.map((section) => (
-        <Card key={section.id}>
+      <div className="grid gap-5 lg:grid-cols-2">
+        {result.sections.map((section) => (
+        <Card key={section.id} data-testid={`section-${section.id}`}>
           <CardHeader>
-            <h3 className="font-semibold text-slate-900">{section.title}</h3>
+            <h3 className="text-base font-bold text-heading">{section.title}</h3>
           </CardHeader>
-          <CardContent className="pt-0">
-            <div className="divide-y divide-slate-100">
-              {section.fields.map((field) => (
-                <div
-                  key={field.key}
-                  className="flex items-center justify-between py-3 first:pt-0 last:pb-0"
-                >
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm text-slate-600">{field.label}</span>
+          <CardContent className="pt-2">
+            {section.fields.map((field) => (
+              <div key={field.key} className="field-row" data-testid={`field-${field.key}`}>
+                <div className="flex min-w-0 items-center gap-2">
+                  <span className="text-sm font-medium text-muted">{field.label}</span>
                     {field.confidence !== "high" && (
-                      <Badge variant="muted" className="text-[10px]">
+                      <Badge variant="muted" className="shrink-0 text-[10px]">
                         {field.confidence === "medium"
                           ? t.results.medium
                           : t.results.low}
                       </Badge>
                     )}
                   </div>
-                  <span className="font-medium text-slate-900">
+                  <span className="text-end text-base font-bold text-heading">
                     {formatFieldValue(field.value, field.type, locale)}
                   </span>
                 </div>
               ))}
-            </div>
-          </CardContent>
-        </Card>
-      ))}
+            </CardContent>
+          </Card>
+        ))}
+      </div>
 
       {/* Raw preview */}
       {result.rawPreview && result.rawPreview.length > 0 && (
         <Card>
           <CardHeader>
-            <h3 className="font-semibold text-slate-900">{t.results.rawData}</h3>
+            <h3 className="font-bold text-slate-900">{t.results.rawData}</h3>
           </CardHeader>
           <CardContent className="overflow-x-auto pt-0">
             <table className="w-full text-sm">
@@ -210,7 +226,7 @@ export function AnalysisResults({ result }: AnalysisResultsProps) {
                 {result.rawPreview.map((row, i) => (
                   <tr key={i} className="border-b border-slate-100 last:border-0">
                     {row.map((cell, j) => (
-                      <td key={j} className="px-3 py-2 text-slate-700">
+                      <td key={j} className="px-3 py-2.5 text-slate-700">
                         {cell || "—"}
                       </td>
                     ))}

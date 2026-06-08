@@ -6,13 +6,7 @@ export function Card({
   ...props
 }: React.HTMLAttributes<HTMLDivElement>) {
   return (
-    <div
-      className={cn(
-        "rounded-2xl border border-slate-200/80 bg-white shadow-sm",
-        className,
-      )}
-      {...props}
-    >
+    <div className={cn("card-elevated overflow-hidden", className)} {...props}>
       {children}
     </div>
   );
@@ -26,7 +20,12 @@ export function CardHeader({
   children: React.ReactNode;
 }) {
   return (
-    <div className={cn("border-b border-slate-100 px-6 py-4", className)}>
+    <div
+      className={cn(
+        "border-b border-[var(--border)] bg-[var(--surface-muted)] px-6 py-4",
+        className,
+      )}
+    >
       {children}
     </div>
   );

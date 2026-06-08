@@ -1,8 +1,9 @@
 "use client";
 
 import { useCallback, useRef, useState } from "react";
-import { Upload, FileSpreadsheet, X, Loader2 } from "lucide-react";
+import { Upload, FileSpreadsheet, FileText, X, Loader2 } from "lucide-react";
 import { useLanguage } from "@/lib/i18n/language-context";
+import { isAcceptedFile } from "@/lib/analyzers/excel-parser";
 import { cn } from "@/lib/utils/cn";
 
 type FileUploadZoneProps = {
@@ -12,14 +13,22 @@ type FileUploadZoneProps = {
   onClear?: () => void;
 };
 
-const ACCEPTED_TYPES = [
+const ACCEPTED_MIME = [
   "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
   "application/vnd.ms-excel",
   "text/csv",
+  "application/pdf",
   ".xlsx",
   ".xls",
   ".csv",
-];
+  ".pdf",
+].join(",");
+
+function FileIcon({ fileName, className }: { fileName: string; className?: string }) {
+  const isPdf = fileName.toLowerCase().endsWith(".pdf");
+  const Icon = isPdf ? FileText : FileSpreadsheet;
+  return <Icon className={className} />;
+}
 
 export function FileUploadZone({
   onFileSelect,
@@ -33,8 +42,7 @@ export function FileUploadZone({
 
   const handleFile = useCallback(
     (file: File) => {
-      const ext = file.name.split(".").pop()?.toLowerCase();
-      if (!ext || !["xlsx", "xls", "csv"].includes(ext)) return;
+      if (!isAcceptedFile(file.name)) return;
       onFileSelect(file);
     },
     [onFileSelect],
@@ -52,17 +60,22 @@ export function FileUploadZone({
 
   if (selectedFile) {
     return (
-      <div className="flex items-center gap-4 rounded-2xl border-2 border-teal-200 bg-teal-50/50 p-6">
-        <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-teal-100 text-teal-600">
+      <div
+        className="file-selected flex items-center gap-4 rounded-2xl p-6"
+        data-testid="file-selected"
+      >
+        <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-[var(--brand-light)] text-[var(--brand)]">
           {isAnalyzing ? (
-            <Loader2 className="h-7 w-7 animate-spin" />
+            <Loader2 className="h-8 w-8 animate-spin" data-testid="analyzing-spinner" />
           ) : (
-            <FileSpreadsheet className="h-7 w-7" />
+            <FileIcon fileName={selectedFile.name} className="h-8 w-8" />
           )}
         </div>
         <div className="min-w-0 flex-1">
-          <p className="truncate font-medium text-slate-900">{selectedFile.name}</p>
-          <p className="text-sm text-slate-500">
+          <p className="truncate text-lg font-semibold text-heading">
+            {selectedFile.name}
+          </p>
+          <p className="text-sm text-muted">
             {isAnalyzing
               ? t.analyze.analyzing
               : `${(selectedFile.size / 1024).toFixed(1)} KB`}
@@ -71,7 +84,8 @@ export function FileUploadZone({
         {!isAnalyzing && onClear && (
           <button
             onClick={onClear}
-            className="rounded-lg p-2 text-slate-400 hover:bg-white hover:text-slate-600"
+            aria-label="Clear file"
+            className="rounded-xl p-2.5 text-muted transition-colors hover:bg-[var(--surface-hover)] hover:text-heading"
           >
             <X className="h-5 w-5" />
           </button>
@@ -90,29 +104,31 @@ export function FileUploadZone({
       onDrop={onDrop}
       onClick={() => inputRef.current?.click()}
       className={cn(
-        "flex cursor-pointer flex-col items-center justify-center gap-4 rounded-2xl border-2 border-dashed p-12 transition-all",
-        isDragging
-          ? "border-teal-400 bg-teal-50/50"
-          : "border-slate-200 bg-slate-50/50 hover:border-teal-300 hover:bg-teal-50/30",
+        "upload-zone flex cursor-pointer flex-col items-center justify-center gap-5 p-12 sm:p-16",
+        isDragging && "dragging",
       )}
+      data-testid="upload-zone"
     >
       <input
         ref={inputRef}
         type="file"
-        accept={ACCEPTED_TYPES.join(",")}
+        accept={ACCEPTED_MIME}
         className="hidden"
+        data-testid="file-input"
         onChange={(e) => {
           const file = e.target.files?.[0];
           if (file) handleFile(file);
         }}
       />
-      <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white shadow-sm">
-        <Upload className="h-8 w-8 text-teal-600" />
+      <div className="flex h-20 w-20 items-center justify-center rounded-3xl bg-[var(--surface)] shadow-md ring-1 ring-[var(--border)]">
+        <Upload className="h-9 w-9 text-[var(--brand)]" />
       </div>
-      <div className="text-center">
-        <p className="text-lg font-medium text-slate-900">{t.analyze.uploadTitle}</p>
-        <p className="mt-1 text-sm text-slate-500">{t.analyze.uploadSubtitle}</p>
-        <p className="mt-2 text-xs text-slate-400">{t.analyze.supportedFormats}</p>
+      <div className="max-w-sm text-center">
+        <p className="text-xl font-bold text-heading">{t.analyze.uploadTitle}</p>
+        <p className="mt-2 text-[15px] text-muted">{t.analyze.uploadSubtitle}</p>
+        <p className="mt-3 inline-block rounded-full bg-[var(--surface-hover)] px-4 py-1.5 text-xs font-medium text-muted">
+          {t.analyze.supportedFormats}
+        </p>
       </div>
     </div>
   );
