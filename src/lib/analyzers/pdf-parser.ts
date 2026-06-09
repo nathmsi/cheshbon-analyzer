@@ -89,12 +89,19 @@ export async function parsePdfFile(file: File): Promise<ParsedWorkbook> {
 }
 
 export async function parsePdfBuffer(buffer: ArrayBuffer): Promise<ParsedWorkbook> {
-  const pdfjs = await import("pdfjs-dist");
+  const pdfjs =
+    typeof window !== "undefined"
+      ? await import("pdfjs-dist")
+      : await import("pdfjs-dist/legacy/build/pdf.mjs");
 
   if (typeof window !== "undefined") {
     pdfjs.GlobalWorkerOptions.workerSrc = "/pdf.worker.mjs";
   } else {
-    pdfjs.GlobalWorkerOptions.workerSrc = "";
+    const { pathToFileURL } = await import("url");
+    const { join } = await import("path");
+    pdfjs.GlobalWorkerOptions.workerSrc = pathToFileURL(
+      join(process.cwd(), "node_modules/pdfjs-dist/legacy/build/pdf.worker.mjs"),
+    ).href;
   }
 
   const pdf = await pdfjs.getDocument({ data: buffer, useSystemFonts: true }).promise;

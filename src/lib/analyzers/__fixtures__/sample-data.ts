@@ -53,6 +53,26 @@ export function buildWorkbook(
 export const paySlipWorkbook = buildWorkbook("תלוש שכר", PAY_SLIP_ROWS);
 export const form106Workbook = buildWorkbook("טופס 106", FORM_106_ROWS);
 
+/** RTL summary layout (value before label) — common in Israeli PDF payslips */
+export const RTL_PAY_SLIP_ROWS: string[][] = [
+  ["תלוש משכורת לחודש", "1/2014"],
+  ["משולם לעובד"],
+  ["21.67 :", "תעריף שעה"],
+  ["5,776.00", "סה\"כ תשלומים"],
+  ["704.00", "סה\"כ ניכויים", "132.00", "ק. השתלמות"],
+  ["5,072.00", "שכר נטו"],
+  ["5,072.00", "נטו לתשלום"],
+  ["230 ביטוח לאומי", "זיכוי משמרות"],
+];
+
+export const rtlPaySlipWorkbook = buildWorkbook("PDF", RTL_PAY_SLIP_ROWS);
+
+export const RTL_PAY_SLIP_EXPECTED = {
+  grossSalary: 5776,
+  netSalary: 5072,
+  nationalInsurance: 230,
+};
+
 /** Expected precision values for pay slip analyzer */
 export const PAY_SLIP_EXPECTED = {
   employeeName: "יוסי כהן",

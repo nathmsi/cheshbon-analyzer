@@ -1,11 +1,14 @@
 import { describe, it, expect } from "vitest";
 import { analyzePaySlip } from "../pay-slip";
 import { analyzeForm106 } from "../form-106";
+import { extractFieldsFromWorkbook, PAY_SLIP_PATTERNS } from "../field-extractor";
 import {
   paySlipWorkbook,
   form106Workbook,
+  rtlPaySlipWorkbook,
   PAY_SLIP_EXPECTED,
   FORM_106_EXPECTED,
+  RTL_PAY_SLIP_EXPECTED,
 } from "../__fixtures__/sample-data";
 
 function getFieldValue(
@@ -81,6 +84,30 @@ describe("Pay Slip Analyzer — precision", () => {
 
   it("includes employee name in title", () => {
     expect(result.summary.title).toContain(PAY_SLIP_EXPECTED.employeeName);
+  });
+});
+
+describe("Pay Slip Analyzer — RTL PDF layout", () => {
+  const result = analyzePaySlip(rtlPaySlipWorkbook, "he");
+
+  it("extracts gross and net from value-before-label rows", () => {
+    expect(getNumericField(result, "grossSalary")).toBe(
+      RTL_PAY_SLIP_EXPECTED.grossSalary,
+    );
+    expect(getNumericField(result, "netSalary")).toBe(
+      RTL_PAY_SLIP_EXPECTED.netSalary,
+    );
+  });
+
+  it("ignores section headers that only label the next detail row", () => {
+    expect(getNumericField(result, "netSalary")).not.toBe(21.67);
+  });
+
+  it("extracts embedded amounts from combined label cells", () => {
+    const fields = extractFieldsFromWorkbook(rtlPaySlipWorkbook, PAY_SLIP_PATTERNS);
+    expect(fields.get("nationalInsurance")?.value).toBe(
+      RTL_PAY_SLIP_EXPECTED.nationalInsurance,
+    );
   });
 });
 
